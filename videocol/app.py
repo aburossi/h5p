@@ -904,10 +904,10 @@ You answer in the same language of the user.
     # Display results if they exist
     if st.session_state.results and any(st.session_state.results.values()):
         st.success("Content generated successfully!")
-    
-        # Align all download buttons in a single row
-        col1, col2, col3, col4 = st.columns(4)
-    
+        
+        # Create a row with columns for all download buttons
+        col1, col2, col3, col4, col5 = st.columns(5)
+        
         with col1:
             st.download_button(
                 label="📥 Transcript",
@@ -916,7 +916,7 @@ You answer in the same language of the user.
                 mime="text/plain",
                 key="download_transcript"
             )
-    
+        
         if 'mcq' in transformed_content:
             with col2:
                 st.download_button(
@@ -926,7 +926,7 @@ You answer in the same language of the user.
                     mime="text/plain",
                     key="download_mcq"
                 )
-    
+        
         if 'glossary' in transformed_content:
             with col3:
                 st.download_button(
@@ -936,7 +936,7 @@ You answer in the same language of the user.
                     mime="text/plain",
                     key="download_glossary"
                 )
-    
+        
         if 'drag' in transformed_content:
             with col4:
                 st.download_button(
@@ -946,11 +946,8 @@ You answer in the same language of the user.
                     mime="text/plain",
                     key="download_drag"
                 )
-    else:
-        st.warning("No content available to display. Please generate content first.")
-   
-        # Add another column for the H5P package download button
-        col5, _, _, _ = st.columns(4)
+        
+        # Add H5P package download button in the same row
         with col5:
             try:
                 # Generate and download the H5P package
@@ -962,13 +959,13 @@ You answer in the same language of the user.
                                 zip_new.writestr(item, zip_ref.read(item.filename))
                     zip_new.writestr('content/content.json', content_json_str)
                     zip_new.writestr('h5p.json', h5p_json_str)
-    
+                
                 buffer.seek(0)
                 updated_zip_bytes = buffer.getvalue()
-    
+                
                 clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
                 clean_filename = clean_filename.replace(' ', '_')
-    
+                
                 st.download_button(
                     label="📥 H5P Package",
                     data=updated_zip_bytes,
@@ -977,6 +974,7 @@ You answer in the same language of the user.
                 )
             except Exception as e:
                 st.error(f"Failed to generate H5P package: {str(e)}")
+
         
         # Add a collapsible section for OpenAI-generated content
         st.markdown("---")
