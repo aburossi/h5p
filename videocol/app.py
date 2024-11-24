@@ -983,14 +983,18 @@ You answer in the same language of the user.
                     
                     zip_new.writestr('content/content.json', content_json_str)
                     zip_new.writestr('h5p.json', h5p_json_str)
-        
+            
                 buffer.seek(0)
                 updated_zip_bytes = buffer.getvalue()
-        
+            
+                # Clean the topic to create a valid filename
+                clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                clean_filename = clean_filename.replace(' ', '_')
+
                 st.download_button(
                     label="📥 Download H5P Package",
                     data=updated_zip_bytes,
-                    file_name="output.zip",
+                    file_name=f"{clean_filename}.h5p",  # Use the cleaned topic name
                     mime="application/zip"
                 )
             except Exception as e:
@@ -998,6 +1002,7 @@ You answer in the same language of the user.
 
 if __name__ == "__main__":
     main()
+
 
 
 
