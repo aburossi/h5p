@@ -594,7 +594,7 @@ def main():
         1. Enter your OpenAI API Key
         2. Paste a YouTube URL
         3. Select content types to generate
-        4. Get AI-powered analysis
+        4. Get H5P Content read to use!
         """)
     
     # Main content
