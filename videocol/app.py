@@ -944,36 +944,18 @@ You answer in the same language of the user.
         st.markdown("---")
         st.markdown("### Download H5P Package")
         
-        # Get the absolute path to the current script directory
+        # Resolve absolute path to template.zip
         current_dir = os.path.dirname(os.path.abspath(__file__))
         template_zip_path = os.path.join(current_dir, 'template.zip')
         
-        # Check if the file exists using the absolute path
+        # Check and use the template.zip file
         if not os.path.exists(template_zip_path):
             st.error(f"The template file '{template_zip_path}' does not exist.")
+            st.write("Current directory contents:", os.listdir(current_dir))
         else:
             st.success(f"Found the template file: {template_zip_path}")
-        else:
+            # Process the template.zip file
             try:
-                # Get values from session state
-                mcq_content = st.session_state.results.get('mcq')
-                glossary_content = st.session_state.results.get('glossary')
-                drag_content = st.session_state.results.get('drag')
-                welcome_text = st.session_state.results.get('welcome')
-                topic = st.session_state.results.get('topic', 'Unbenannte Einheit')
-                video_url = st.session_state.results.get('url')
-
-                # Create content.json and h5p.json
-                content_json_str = create_content_json(
-                    video_url=video_url,
-                    mcq_content=mcq_content,
-                    glossary_content=glossary_content,
-                    drag_content=drag_content,
-                    welcome_text=welcome_text
-                )
-                h5p_json_str = create_h5p_json(topic)
-
-                # Create zip file
                 buffer = io.BytesIO()
                 with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
                     with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
@@ -986,7 +968,7 @@ You answer in the same language of the user.
                 
                 buffer.seek(0)
                 updated_zip_bytes = buffer.getvalue()
-
+        
                 st.download_button(
                     label="📥 Download H5P Package",
                     data=updated_zip_bytes,
