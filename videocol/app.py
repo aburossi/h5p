@@ -608,7 +608,7 @@ def main():
     with col1:
         language = st.selectbox(
             "Transcript Language",
-            options=["de", "en", "es", "fr", "auto"],
+            options=["en", "de", "es", "fr", "auto"],
             index=0
         )
     
