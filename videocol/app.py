@@ -904,12 +904,30 @@ You answer in the same language of the user.
     # Display results if they exist
     template_zip_path = "path/to/your/template.zip"  # Update this path accordingly
     
+    # Check and add content for the H5P package
     if st.session_state.results and any(st.session_state.results.values()):
         st.success("Content generated successfully!")
         
-        # Create a row with columns for all download buttons
+        # Generate content.json and h5p.json
+        try:
+            content_json_str = create_content_json(
+                video_url=st.session_state.results.get('url', ''),
+                mcq_content=st.session_state.results.get('mcq'),
+                glossary_content=st.session_state.results.get('glossary'),
+                drag_content=st.session_state.results.get('drag'),
+                welcome_text=st.session_state.results.get('welcome')
+            )
+            
+            h5p_json_str = create_h5p_json(st.session_state.results.get('topic', 'Unbenannte Einheit'))
+        except Exception as e:
+            st.error(f"Failed to create H5P JSON: {str(e)}")
+            content_json_str = None
+            h5p_json_str = None
+    
+        # Display download buttons
         col1, col2, col3, col4, col5 = st.columns(5)
-        
+    
+        # Existing download buttons
         with col1:
             st.download_button(
                 label="📥 Transcript",
@@ -918,7 +936,7 @@ You answer in the same language of the user.
                 mime="text/plain",
                 key="download_transcript"
             )
-        
+    
         if 'mcq' in transformed_content:
             with col2:
                 st.download_button(
@@ -928,7 +946,7 @@ You answer in the same language of the user.
                     mime="text/plain",
                     key="download_mcq"
                 )
-        
+    
         if 'glossary' in transformed_content:
             with col3:
                 st.download_button(
@@ -938,7 +956,7 @@ You answer in the same language of the user.
                     mime="text/plain",
                     key="download_glossary"
                 )
-        
+    
         if 'drag' in transformed_content:
             with col4:
                 st.download_button(
@@ -948,42 +966,43 @@ You answer in the same language of the user.
                     mime="text/plain",
                     key="download_drag"
                 )
-        
-        # Add H5P package download button in the same row
-        # Determine the path to the template file
+    
+        # H5P Package Button
         template_zip_path = os.path.join(os.path.dirname(__file__), "template.zip")
-        
+    
         if not os.path.exists(template_zip_path):
             st.error(f"Template file not found at {template_zip_path}")
         else:
             with col5:
-                try:
-                    # Generate and download the H5P package
-                    buffer = io.BytesIO()
-                    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
-                        with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
-                            for item in zip_ref.infolist():
-                                if item.filename not in ['content/content.json', 'h5p.json']:
-                                    zip_new.writestr(item, zip_ref.read(item.filename))
-                        zip_new.writestr('content/content.json', content_json_str)
-                        zip_new.writestr('h5p.json', h5p_json_str)
-                    
-                    buffer.seek(0)
-                    updated_zip_bytes = buffer.getvalue()
-                    
-                    clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                    clean_filename = clean_filename.replace(' ', '_')
-                    
-                    st.download_button(
-                        label="📥 H5P Package",
-                        data=updated_zip_bytes,
-                        file_name=f"{clean_filename}.h5p",
-                        mime="application/zip"
-                    )
-                except Exception as e:
-                    st.error(f"Failed to generate H5P package: {str(e)}")
-
-        
+                if content_json_str and h5p_json_str:
+                    try:
+                        # Generate and download the H5P package
+                        buffer = io.BytesIO()
+                        with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
+                            with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
+                                for item in zip_ref.infolist():
+                                    if item.filename not in ['content/content.json', 'h5p.json']:
+                                        zip_new.writestr(item, zip_ref.read(item.filename))
+                            zip_new.writestr('content/content.json', content_json_str)
+                            zip_new.writestr('h5p.json', h5p_json_str)
+    
+                        buffer.seek(0)
+                        updated_zip_bytes = buffer.getvalue()
+    
+                        clean_filename = "".join(c for c in st.session_state.results['topic'] if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                        clean_filename = clean_filename.replace(' ', '_')
+    
+                        st.download_button(
+                            label="📥 H5P Package",
+                            data=updated_zip_bytes,
+                            file_name=f"{clean_filename}.h5p",
+                            mime="application/zip"
+                        )
+                    except Exception as e:
+                        st.error(f"Failed to generate H5P package: {str(e)}")
+                else:
+                    st.error("H5P package could not be created due to missing content.")
+       
         # Add a collapsible section for OpenAI-generated content
         st.markdown("---")
         st.markdown("### OpenAI-Generated Content")
