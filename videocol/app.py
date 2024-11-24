@@ -943,11 +943,16 @@ You answer in the same language of the user.
         # H5P Package Generation
         st.markdown("---")
         st.markdown("### Download H5P Package")
-
-        template_zip_path = "template.zip"
         
+        # Get the absolute path to the current script directory
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        template_zip_path = os.path.join(current_dir, 'template.zip')
+        
+        # Check if the file exists using the absolute path
         if not os.path.exists(template_zip_path):
-            st.error(f"The template file '{template_zip_path}' does not exist in the current directory.")
+            st.error(f"The template file '{template_zip_path}' does not exist.")
+        else:
+            st.success(f"Found the template file: {template_zip_path}")
         else:
             try:
                 # Get values from session state
