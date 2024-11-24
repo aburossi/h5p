@@ -905,6 +905,7 @@ You answer in the same language of the user.
     template_zip_path = "path/to/your/template.zip"  # Update this path accordingly
     
     # Check and add content for the H5P package
+    # Display results if they exist
     if st.session_state.results and any(st.session_state.results.values()):
         st.success("Content generated successfully!")
         
@@ -924,10 +925,10 @@ You answer in the same language of the user.
             content_json_str = None
             h5p_json_str = None
     
-        # Display download buttons
-        col1, col2, col3, col4, col5 = st.columns(5)
+        # Create a row with columns for Transcript and H5P download buttons
+        col1, col2 = st.columns(2)
     
-        # Existing download buttons
+        # Transcript download button
         with col1:
             st.download_button(
                 label="📥 Transcript",
@@ -937,43 +938,13 @@ You answer in the same language of the user.
                 key="download_transcript"
             )
     
-        if 'mcq' in transformed_content:
-            with col2:
-                st.download_button(
-                    label="📥 MCQ",
-                    data=transformed_content['mcq'],
-                    file_name="mcq_questions.txt",
-                    mime="text/plain",
-                    key="download_mcq"
-                )
-    
-        if 'glossary' in transformed_content:
-            with col3:
-                st.download_button(
-                    label="📥 Glossary",
-                    data=transformed_content['glossary'],
-                    file_name="glossary.txt",
-                    mime="text/plain",
-                    key="download_glossary"
-                )
-    
-        if 'drag' in transformed_content:
-            with col4:
-                st.download_button(
-                    label="📥 Drag Words",
-                    data=transformed_content['drag'],
-                    file_name="drag_words.txt",
-                    mime="text/plain",
-                    key="download_drag"
-                )
-    
-        # H5P Package Button
+        # H5P Package download button
         template_zip_path = os.path.join(os.path.dirname(__file__), "template.zip")
     
         if not os.path.exists(template_zip_path):
             st.error(f"Template file not found at {template_zip_path}")
         else:
-            with col5:
+            with col2:
                 if content_json_str and h5p_json_str:
                     try:
                         # Generate and download the H5P package
@@ -1002,6 +973,7 @@ You answer in the same language of the user.
                         st.error(f"Failed to generate H5P package: {str(e)}")
                 else:
                     st.error("H5P package could not be created due to missing content.")
+
        
         # Add a collapsible section for OpenAI-generated content
         st.markdown("---")
