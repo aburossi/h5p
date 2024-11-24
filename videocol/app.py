@@ -948,6 +948,24 @@ You answer in the same language of the user.
         current_dir = os.path.dirname(os.path.abspath(__file__))
         template_zip_path = os.path.join(current_dir, 'template.zip')
         
+        # Get required variables from session state
+        mcq_content = st.session_state.results.get('mcq')
+        glossary_content = st.session_state.results.get('glossary')
+        drag_content = st.session_state.results.get('drag')
+        welcome_text = st.session_state.results.get('welcome')
+        topic = st.session_state.results.get('topic', 'Unbenannte Einheit')
+        video_url = st.session_state.results.get('url')
+        
+        # Generate the JSON strings for H5P content and metadata
+        content_json_str = create_content_json(
+            video_url=video_url,
+            mcq_content=mcq_content,
+            glossary_content=glossary_content,
+            drag_content=drag_content,
+            welcome_text=welcome_text
+        )
+        h5p_json_str = create_h5p_json(topic)
+        
         # Check and use the template.zip file
         if not os.path.exists(template_zip_path):
             st.error(f"The template file '{template_zip_path}' does not exist.")
@@ -965,7 +983,7 @@ You answer in the same language of the user.
                     
                     zip_new.writestr('content/content.json', content_json_str)
                     zip_new.writestr('h5p.json', h5p_json_str)
-                
+        
                 buffer.seek(0)
                 updated_zip_bytes = buffer.getvalue()
         
