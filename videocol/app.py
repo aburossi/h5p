@@ -599,7 +599,7 @@ def main():
     
     # Main content
     st.title("🎥 YouTube Content Analyzer")
-    st.markdown("### Transform video content into valuable insights using AI")
+    st.markdown("### Transform video content into H5P Column with Q&A")
     
     # Input section
     url = st.text_input("YouTube Video URL", placeholder="https://www.youtube.com/watch?v=example")
