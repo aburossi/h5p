@@ -608,7 +608,7 @@ def main():
     with col1:
         language = st.selectbox(
             "Transcript Language",
-            options=["en", "de", "es", "fr", "auto"],
+            options=["de", "en", "es", "fr", "auto"],
             index=0
         )
     
@@ -939,7 +939,7 @@ You answer in the same language of the user.
         for tab, (content_type, content) in zip(tabs, transformed_content.items()):
             with tab:
                 st.markdown(content)
-        
+                
         # H5P Package Generation
         st.markdown("---")
         st.markdown("### Download H5P Package")
@@ -967,38 +967,55 @@ You answer in the same language of the user.
         h5p_json_str = create_h5p_json(topic)
         
         # Check and use the template.zip file
-        if not os.path.exists(template_zip_path):
-            st.error(f"The template file '{template_zip_path}' does not exist.")
-            st.write("Current directory contents:", os.listdir(current_dir))
-        else:
-            st.success(f"Found the template file: {template_zip_path}")
-            # Process the template.zip file
-            try:
-                buffer = io.BytesIO()
-                with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
-                    with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
-                        for item in zip_ref.infolist():
-                            if item.filename not in ['content/content.json', 'h5p.json']:
-                                zip_new.writestr(item, zip_ref.read(item.filename))
-                    
-                    zip_new.writestr('content/content.json', content_json_str)
-                    zip_new.writestr('h5p.json', h5p_json_str)
-            
-                buffer.seek(0)
-                updated_zip_bytes = buffer.getvalue()
-            
-                # Clean the topic to create a valid filename
-                clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                clean_filename = clean_filename.replace(' ', '_')
-
-                st.download_button(
-                    label="📥 Download H5P Package",
-                    data=updated_zip_bytes,
-                    file_name=f"{clean_filename}.h5p",  # Use the cleaned topic name
-                    mime="application/zip"
-                )
-            except Exception as e:
-                st.error(f"Failed to generate H5P package: {str(e)}")
+        try:
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
+                with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
+                    for item in zip_ref.infolist():
+                        if item.filename not in ['content/content.json', 'h5p.json']:
+                            zip_new.writestr(item, zip_ref.read(item.filename))
+                zip_new.writestr('content/content.json', content_json_str)
+                zip_new.writestr('h5p.json', h5p_json_str)
+        
+            buffer.seek(0)
+            updated_zip_bytes = buffer.getvalue()
+        
+            # Clean the topic to create a valid filename
+            clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            clean_filename = clean_filename.replace(' ', '_')
+        
+            st.download_button(
+                label="📥 Download H5P Package",
+                data=updated_zip_bytes,
+                file_name=f"{clean_filename}.h5p",
+                mime="application/zip"
+            )
+        except Exception as e:
+            st.error(f"Failed to generate H5P package: {str(e)}")
+        
+        # Add a collapsible section for OpenAI-generated content
+        st.markdown("---")
+        st.markdown("### OpenAI-Generated Content")
+        
+        with st.expander("📄 View Generated Content"):
+            transformed_content = {}
+        
+            # Transform the content for display
+            if 'mcq' in st.session_state.results and st.session_state.results['mcq']:
+                transformed_content['MCQ'] = json.dumps(st.session_state.results['mcq'], indent=2)
+        
+            if 'glossary' in st.session_state.results and st.session_state.results['glossary']:
+                transformed_content['Glossary'] = json.dumps(st.session_state.results['glossary'], indent=2)
+        
+            if 'drag' in st.session_state.results and st.session_state.results['drag']:
+                transformed_content['Drag Words'] = json.dumps(st.session_state.results['drag'], indent=2)
+        
+            # Display transformed content in tabs
+            if transformed_content:
+                tabs = st.tabs([k.upper() for k in transformed_content.keys()])
+                for tab, (content_type, content) in zip(tabs, transformed_content.items()):
+                    with tab:
+                        st.text_area(f"{content_type} Content", content, height=300)
 
 if __name__ == "__main__":
     main()
