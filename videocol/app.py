@@ -889,10 +889,10 @@ You answer in the same language of the user.
     # Display results if they exist
     if st.session_state.results and any(st.session_state.results.values()):
         st.success("Content generated successfully!")
-        
-        # Download buttons moved above the content tabs
+    
+        # Align all download buttons in a single row
         col1, col2, col3, col4 = st.columns(4)
-        
+    
         with col1:
             st.download_button(
                 label="📥 Transcript",
@@ -900,10 +900,7 @@ You answer in the same language of the user.
                 file_name=f"youtube_transcript_{language}.txt",
                 mime="text/plain"
             )
-        
-        # Transform the content before creating download buttons and tabs
-        transformed_content = {}
-        
+    
         if 'mcq' in st.session_state.results and st.session_state.results['mcq']:
             transformed_content['mcq'] = json.dumps(st.session_state.results['mcq'], indent=2)
             with col2:
@@ -913,7 +910,7 @@ You answer in the same language of the user.
                     file_name="mcq_questions.txt",
                     mime="text/plain"
                 )
-        
+    
         if 'glossary' in st.session_state.results and st.session_state.results['glossary']:
             transformed_content['glossary'] = json.dumps(st.session_state.results['glossary'], indent=2)
             with col3:
@@ -923,7 +920,7 @@ You answer in the same language of the user.
                     file_name="glossary.txt",
                     mime="text/plain"
                 )
-        
+    
         if 'drag' in st.session_state.results and st.session_state.results['drag']:
             transformed_content['drag'] = json.dumps(st.session_state.results['drag'], indent=2)
             with col4:
@@ -933,65 +930,35 @@ You answer in the same language of the user.
                     file_name="drag_words.txt",
                     mime="text/plain"
                 )
-        
-        # Display transformed content in tabs instead of raw JSON
-        tabs = st.tabs([k.upper() for k in transformed_content.keys()])
-        for tab, (content_type, content) in zip(tabs, transformed_content.items()):
-            with tab:
-                st.markdown(content)
-                
-        # H5P Package Generation
-        st.markdown("---")
-        st.markdown("### Download H5P Package")
-        
-        # Resolve absolute path to template.zip
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        template_zip_path = os.path.join(current_dir, 'template.zip')
-        
-        # Get required variables from session state
-        mcq_content = st.session_state.results.get('mcq')
-        glossary_content = st.session_state.results.get('glossary')
-        drag_content = st.session_state.results.get('drag')
-        welcome_text = st.session_state.results.get('welcome')
-        topic = st.session_state.results.get('topic', 'Unbenannte Einheit')
-        video_url = st.session_state.results.get('url')
-        
-        # Generate the JSON strings for H5P content and metadata
-        content_json_str = create_content_json(
-            video_url=video_url,
-            mcq_content=mcq_content,
-            glossary_content=glossary_content,
-            drag_content=drag_content,
-            welcome_text=welcome_text
-        )
-        h5p_json_str = create_h5p_json(topic)
-        
-        # Check and use the template.zip file
-        try:
-            buffer = io.BytesIO()
-            with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
-                with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
-                    for item in zip_ref.infolist():
-                        if item.filename not in ['content/content.json', 'h5p.json']:
-                            zip_new.writestr(item, zip_ref.read(item.filename))
-                zip_new.writestr('content/content.json', content_json_str)
-                zip_new.writestr('h5p.json', h5p_json_str)
-        
-            buffer.seek(0)
-            updated_zip_bytes = buffer.getvalue()
-        
-            # Clean the topic to create a valid filename
-            clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
-            clean_filename = clean_filename.replace(' ', '_')
-        
-            st.download_button(
-                label="📥 Download H5P Package",
-                data=updated_zip_bytes,
-                file_name=f"{clean_filename}.h5p",
-                mime="application/zip"
-            )
-        except Exception as e:
-            st.error(f"Failed to generate H5P package: {str(e)}")
+    
+        # Add another column for the H5P package download button
+        col5, _, _, _ = st.columns(4)
+        with col5:
+            try:
+                # Generate and download the H5P package
+                buffer = io.BytesIO()
+                with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
+                    with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
+                        for item in zip_ref.infolist():
+                            if item.filename not in ['content/content.json', 'h5p.json']:
+                                zip_new.writestr(item, zip_ref.read(item.filename))
+                    zip_new.writestr('content/content.json', content_json_str)
+                    zip_new.writestr('h5p.json', h5p_json_str)
+    
+                buffer.seek(0)
+                updated_zip_bytes = buffer.getvalue()
+    
+                clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                clean_filename = clean_filename.replace(' ', '_')
+    
+                st.download_button(
+                    label="📥 H5P Package",
+                    data=updated_zip_bytes,
+                    file_name=f"{clean_filename}.h5p",
+                    mime="application/zip"
+                )
+            except Exception as e:
+                st.error(f"Failed to generate H5P package: {str(e)}")
         
         # Add a collapsible section for OpenAI-generated content
         st.markdown("---")
