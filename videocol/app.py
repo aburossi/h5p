@@ -902,51 +902,6 @@ You answer in the same language of the user.
         transformed_content['drag'] = json.dumps(st.session_state.results['drag'], indent=2)
     
     # Display results if they exist
-    if transformed_content:
-        st.success("Content generated successfully!")
-        
-        # Align all download buttons in a single row
-        col1, col2, col3, col4 = st.columns(4)
-    
-        with col1:
-            st.download_button(
-                label="📥 Transcript",
-                data=clean_text(st.session_state.transcript),
-                file_name=f"youtube_transcript_{language}.txt",
-                mime="text/plain"
-            )
-    
-        if 'mcq' in transformed_content:
-            with col2:
-                st.download_button(
-                    label="📥 MCQ",
-                    data=transformed_content['mcq'],
-                    file_name="mcq_questions.txt",
-                    mime="text/plain"
-                )
-    
-        if 'glossary' in transformed_content:
-            with col3:
-                st.download_button(
-                    label="📥 Glossary",
-                    data=transformed_content['glossary'],
-                    file_name="glossary.txt",
-                    mime="text/plain"
-                )
-    
-        if 'drag' in transformed_content:
-            with col4:
-                st.download_button(
-                    label="📥 Drag Words",
-                    data=transformed_content['drag'],
-                    file_name="drag_words.txt",
-                    mime="text/plain"
-                )
-    else:
-        st.warning("No content available to display. Please generate content first.")
-
-    
-    # Display results if they exist
     if st.session_state.results and any(st.session_state.results.values()):
         st.success("Content generated successfully!")
     
@@ -991,8 +946,9 @@ You answer in the same language of the user.
                     mime="text/plain",
                     key="download_drag"
                 )
-
-    
+    else:
+        st.warning("No content available to display. Please generate content first.")
+   
         # Add another column for the H5P package download button
         col5, _, _, _ = st.columns(4)
         with col5:
