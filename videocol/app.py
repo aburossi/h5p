@@ -902,6 +902,8 @@ You answer in the same language of the user.
         transformed_content['drag'] = json.dumps(st.session_state.results['drag'], indent=2)
     
     # Display results if they exist
+    template_zip_path = "path/to/your/template.zip"  # Update this path accordingly
+    
     if st.session_state.results and any(st.session_state.results.values()):
         st.success("Content generated successfully!")
         
