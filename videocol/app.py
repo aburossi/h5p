@@ -958,38 +958,40 @@ You answer in the same language of the user.
                 label="📥 Transcript",
                 data=clean_text(st.session_state.transcript),
                 file_name=f"youtube_transcript_{language}.txt",
-                mime="text/plain"
+                mime="text/plain",
+                key="download_transcript"
             )
     
-        if 'mcq' in st.session_state.results and st.session_state.results['mcq']:
-            transformed_content['mcq'] = json.dumps(st.session_state.results['mcq'], indent=2)
+        if 'mcq' in transformed_content:
             with col2:
                 st.download_button(
                     label="📥 MCQ",
                     data=transformed_content['mcq'],
                     file_name="mcq_questions.txt",
-                    mime="text/plain"
+                    mime="text/plain",
+                    key="download_mcq"
                 )
     
-        if 'glossary' in st.session_state.results and st.session_state.results['glossary']:
-            transformed_content['glossary'] = json.dumps(st.session_state.results['glossary'], indent=2)
+        if 'glossary' in transformed_content:
             with col3:
                 st.download_button(
                     label="📥 Glossary",
                     data=transformed_content['glossary'],
                     file_name="glossary.txt",
-                    mime="text/plain"
+                    mime="text/plain",
+                    key="download_glossary"
                 )
     
-        if 'drag' in st.session_state.results and st.session_state.results['drag']:
-            transformed_content['drag'] = json.dumps(st.session_state.results['drag'], indent=2)
+        if 'drag' in transformed_content:
             with col4:
                 st.download_button(
                     label="📥 Drag Words",
                     data=transformed_content['drag'],
                     file_name="drag_words.txt",
-                    mime="text/plain"
+                    mime="text/plain",
+                    key="download_drag"
                 )
+
     
         # Add another column for the H5P package download button
         col5, _, _, _ = st.columns(4)
