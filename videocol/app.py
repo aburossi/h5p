@@ -950,32 +950,38 @@ You answer in the same language of the user.
                 )
         
         # Add H5P package download button in the same row
-        with col5:
-            try:
-                # Generate and download the H5P package
-                buffer = io.BytesIO()
-                with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
-                    with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
-                        for item in zip_ref.infolist():
-                            if item.filename not in ['content/content.json', 'h5p.json']:
-                                zip_new.writestr(item, zip_ref.read(item.filename))
-                    zip_new.writestr('content/content.json', content_json_str)
-                    zip_new.writestr('h5p.json', h5p_json_str)
-                
-                buffer.seek(0)
-                updated_zip_bytes = buffer.getvalue()
-                
-                clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                clean_filename = clean_filename.replace(' ', '_')
-                
-                st.download_button(
-                    label="📥 H5P Package",
-                    data=updated_zip_bytes,
-                    file_name=f"{clean_filename}.h5p",
-                    mime="application/zip"
-                )
-            except Exception as e:
-                st.error(f"Failed to generate H5P package: {str(e)}")
+        # Determine the path to the template file
+        template_zip_path = os.path.join(os.path.dirname(__file__), "template.zip")
+        
+        if not os.path.exists(template_zip_path):
+            st.error(f"Template file not found at {template_zip_path}")
+        else:
+            with col5:
+                try:
+                    # Generate and download the H5P package
+                    buffer = io.BytesIO()
+                    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_new:
+                        with zipfile.ZipFile(template_zip_path, 'r') as zip_ref:
+                            for item in zip_ref.infolist():
+                                if item.filename not in ['content/content.json', 'h5p.json']:
+                                    zip_new.writestr(item, zip_ref.read(item.filename))
+                        zip_new.writestr('content/content.json', content_json_str)
+                        zip_new.writestr('h5p.json', h5p_json_str)
+                    
+                    buffer.seek(0)
+                    updated_zip_bytes = buffer.getvalue()
+                    
+                    clean_filename = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                    clean_filename = clean_filename.replace(' ', '_')
+                    
+                    st.download_button(
+                        label="📥 H5P Package",
+                        data=updated_zip_bytes,
+                        file_name=f"{clean_filename}.h5p",
+                        mime="application/zip"
+                    )
+                except Exception as e:
+                    st.error(f"Failed to generate H5P package: {str(e)}")
 
         
         # Add a collapsible section for OpenAI-generated content
